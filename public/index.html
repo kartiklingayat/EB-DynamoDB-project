@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced DynamoDB Form</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --secondary: #64748b;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --dark: #1f2937;
+            --light: #f8fafc;
+            --gray: #94a3b8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-section {
+            padding: 40px;
+            background: white;
+        }
+
+        .data-section {
+            padding: 40px;
+            background: #f8fafc;
+            max-height: 100vh;
+            overflow-y: auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            color: var(--dark);
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: var(--secondary);
+            font-size: 1.1rem;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--dark);
+            font-weight: 600;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 14px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: var(--secondary);
+            font-size: 0.9rem;
+        }
+
+        .data-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .data-item {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border-left: 4px solid var(--primary);
+        }
+
+        .data-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .data-name {
+            font-weight: bold;
+            color: var(--dark);
+            font-size: 1.1rem;
+        }
+
+        .data-email {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .data-email:hover {
+            text-decoration: underline;
+        }
+
+        .data-meta {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: var(--secondary);
+        }
+
+        .data-meta span {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .data-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .category-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .category-general { background: #dbeafe; color: #1e40af; }
+        .category-support { background: #dcfce7; color: #166534; }
+        .category-feedback { background: #fef3c7; color: #92400e; }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 10px;
+            color: white;
+            font-weight: 600;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success { background: var(--success); }
+        .notification.error { background: var(--danger); }
+        .notification.warning { background: var(--warning); }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-section, .data-section {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Form Section -->
+        <div class="form-section">
+            <div class="header">
+                <h1><i class="fas fa-database"></i> DynamoDB Form</h1>
+                <p>Store and manage your data with AWS DynamoDB</p>
+            </div>
+
+            <form id="dataForm">
+                <div class="form-group">
+                    <label for="name"><i class="fas fa-user"></i> Full Name *</label>
+                    <input type="text" id="name" name="name" required placeholder="Enter your full name">
+                </div>
+
+                <div class="form-group">
+                    <label for="email"><i class="fas fa-envelope"></i> Email Address *</label>
+                    <input type="email" id="email" name="email" required placeholder="Enter your email">
+                </div>
+
+                <div class="form-group">
+                    <label for="phone"><i class="fas fa-phone"></i> Phone Number</label>
+                    <input type="tel" id="phone" name="phone" placeholder="Enter your phone number">
+                </div>
+
+                <div class="form-group">
+                    <label for="category"><i class="fas fa-tag"></i> Category</label>
+                    <select id="category" name="category">
+                        <option value="General">General Inquiry</option>
+                        <option value="Support">Technical Support</option>
+                        <option value="Feedback">Feedback</option>
+                        <option value="Sales">Sales</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="message"><i class="fas fa-comment"></i> Message</label>
+                    <textarea id="message" name="message" placeholder="Enter your message..."></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-paper-plane"></i> Submit Data
+                </button>
+            </form>
+        </div>
+
+        <!-- Data Section -->
+        <div class="data-section">
+            <div class="header">
+                <h2><i class="fas fa-list"></i> Stored Data</h2>
+                <p>Real-time data from DynamoDB</p>
+            </div>
+
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalCount">0</div>
+                    <div class="stat-label">Total Entries</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="todayCount">0</div>
+                    <div class="stat-label">Today's Entries</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="activeCount">0</div>
+                    <div class="stat-label">Active</div>
+                </div>
+            </div>
+
+            <div class="data-controls">
+                <button class="btn btn-primary" onclick="loadData()">
+                    <i class="fas fa-sync-alt"></i> Refresh Data
+                </button>
+            </div>
+
+            <div class="data-list" id="dataList">
+                <div class="data-item empty">
+                    <p>No data found. Submit some data to get started!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="notification" id="notification"></div>
+
+    <script>
+        // DOM Elements
+        const form = document.getElementById('dataForm');
+        const dataList = document.getElementById('dataList');
+        const notification = document.getElementById('notification');
+        const totalCount = document.getElementById('totalCount');
+        const todayCount = document.getElementById('todayCount');
+        const activeCount = document.getElementById('activeCount');
+
+        // Show notification
+        function showNotification(message, type = 'success') {
+            notification.textContent = message;
+            notification.className = `notification ${type} show`;
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Format date
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleString();
+        }
+
+        // Load data from server
+        async function loadData() {
+            try {
+                const response = await fetch('/data');
+                const result = await response.json();
+                
+                if (result.success) {
+                    renderData(result.data);
+                    updateStats(result.data);
+                } else {
+                    showNotification('Error loading data', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showNotification('Failed to load data', 'error');
+            }
+        }
+
+        // Update statistics
+        function updateStats(data) {
+            totalCount.textContent = data.length;
+            
+            const today = new Date().toDateString();
+            const todayEntries = data.filter(item => {
+                return new Date(item.createdAt).toDateString() === today;
+            });
+            todayCount.textContent = todayEntries.length;
+            
+            const activeEntries = data.filter(item => item.status === 'Active');
+            activeCount.textContent = activeEntries.length;
+        }
+
+        // Render data list
+        function renderData(data) {
+            if (data.length === 0) {
+                dataList.innerHTML = `
+                    <div class="data-item empty">
+                        <p>No data found. Submit some data to get started!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            dataList.innerHTML = data.map(item => `
+                <div class="data-item">
+                    <div class="data-header">
+                        <div>
+                            <div class="data-name">${item.name}</div>
+                            <a href="mailto:${item.email}" class="data-email">${item.email}</a>
+                        </div>
+                        <span class="category-badge category-${item.category.toLowerCase()}">
+                            ${item.category}
+                        </span>
+                    </div>
+                    
+                    ${item.message ? `<p>${item.message}</p>` : ''}
+                    
+                    <div class="data-meta">
+                        <span><i class="fas fa-phone"></i> ${item.phone || 'N/A'}</span>
+                        <span><i class="fas fa-clock"></i> ${formatDate(item.createdAt)}</span>
+                        <span><i class="fas fa-circle"></i> ${item.status}</span>
+                    </div>
+                    
+                    <div class="data-actions">
+                        <button class="btn btn-danger btn-sm" onclick="deleteData('${item.id}')">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Delete data
+        async function deleteData(id) {
+            if (!confirm('Are you sure you want to delete this entry?')) return;
+            
+            try {
+                const response = await fetch(`/data/${id}`, {
+                    method: 'DELETE'
+                });
+                const result = await response.json();
+                
+                if (result.success) {
+                    showNotification('Data deleted successfully!');
+                    loadData();
+                } else {
+                    showNotification('Error deleting data', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showNotification('Failed to delete data', 'error');
+            }
+        }
+
+        // Handle form submission
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            
+            try {
+                submitBtn.innerHTML = '<span class="loading"></span> Submitting...';
+                submitBtn.disabled = true;
+                
+                const formData = new FormData(form);
+                const data = Object.fromEntries(formData);
+                
+                const response = await fetch('/submit', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showNotification('Data saved successfully!');
+                    form.reset();
+                    loadData();
+                } else {
+                    showNotification(result.message, 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showNotification('Failed to save data', 'error');
+            } finally {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadData();
+            // Auto-refresh every 30 seconds
+            setInterval(loadData, 30000);
+        });
+    </script>
+</body>
+</html>
